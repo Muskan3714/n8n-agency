@@ -1,0 +1,133 @@
+{
+  "name": "Day1 - Webhook to Sheets",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "day1-test",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "18688d27-fa42-464f-b5cd-d973b3f26c07",
+      "name": "Webhook",
+      "webhookId": "67a1b7d5-16b5-4f31-b01e-f9de61765273"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1wHde9etM2Aj3pMCtq1pnXZHeWxrZMcCjF7c-v1Z3Am8",
+          "mode": "list",
+          "cachedResultName": "Day1 Test Leads",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1wHde9etM2Aj3pMCtq1pnXZHeWxrZMcCjF7c-v1Z3Am8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1wHde9etM2Aj3pMCtq1pnXZHeWxrZMcCjF7c-v1Z3Am8/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "name": "={{ $json.body.name }}",
+            " phone": "={{ $json.body.phone }}",
+            "message": "={{ $json.body.message }}",
+            "received_at": "={{ $now }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": " phone",
+              "displayName": " phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "received_at",
+              "displayName": "received_at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        86.45241769547303,
+        7.92527086548354
+      ],
+      "id": "4a0bd0c9-9675-4005-9045-2645f9f5eb1d",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "g9gCwsyxBgpio0Ru",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "49fabaec-61ea-4c60-998d-5fa3db390498",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "85964b30027a28a078a34894c906e720e0d5ee3760c246c4149ea53954f7fd84"
+  },
+  "nodeGroups": [],
+  "id": "7oJcwNQJ1aqoXr7e",
+  "tags": []
+}

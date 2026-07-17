@@ -1,0 +1,314 @@
+{
+  "name": "Day2 - Clean and Dedupe Contacts",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -464,
+        0
+      ],
+      "id": "0c474d75-018b-4fe3-bbe7-61dd47290963",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ca978275-1fbd-4db6-bd66-aba964adf699",
+              "name": "",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -320,
+        0
+      ],
+      "id": "0d712a61-fc25-49dc-bd7d-4e3ff55cf6f4",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1mLiSkGSRihZYUTEnXN6F8MxGucvPbhSoa2eV1jek880",
+          "mode": "list",
+          "cachedResultName": "Day2 Messy Contacts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1mLiSkGSRihZYUTEnXN6F8MxGucvPbhSoa2eV1jek880/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1mLiSkGSRihZYUTEnXN6F8MxGucvPbhSoa2eV1jek880/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -48,
+        0
+      ],
+      "id": "ae487ce8-a8ae-4067-b5e2-f92ed5345890",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "g9gCwsyxBgpio0Ru",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "fb570c07-e9fb-47c4-a355-4339f0e433d7",
+              "name": "clean_name",
+              "value": "={{ $json.raw_name.trim().split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') }}",
+              "type": "string"
+            },
+            {
+              "id": "94cd9a6d-910d-4b5f-bb55-41ee442cdd41",
+              "name": "clean_phone",
+              "value": "={{ $json.raw_phone ? String($json.raw_phone).replace(/[^0-9+]/g, '') : '' }}",
+              "type": "string"
+            },
+            {
+              "id": "a7900e93-bb6d-4a10-9a76-ae75782e2594",
+              "name": "clean_email",
+              "value": "={{ $json.raw_email ? $json.raw_email.trim().toLowerCase() : '' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -176,
+        0
+      ],
+      "id": "59c2d9e4-0fcc-462e-a793-66fad2116f12",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "d3db197a-fe01-470d-ba91-148d8fea3049",
+              "leftValue": "={{ $json.clean_phone }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        192,
+        0
+      ],
+      "id": "6a86b236-bc76-4afa-846d-f0e35f6e319a",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "compare": "={{ $json.clean_phone }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        400,
+        -96
+      ],
+      "id": "75ddaaf0-ebeb-491e-a844-23f7cde92f95",
+      "name": "Remove Duplicates"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1mLiSkGSRihZYUTEnXN6F8MxGucvPbhSoa2eV1jek880",
+          "mode": "list",
+          "cachedResultName": "Day2 Messy Contacts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1mLiSkGSRihZYUTEnXN6F8MxGucvPbhSoa2eV1jek880/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 236239300,
+          "mode": "list",
+          "cachedResultName": "Clean Contacts",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1mLiSkGSRihZYUTEnXN6F8MxGucvPbhSoa2eV1jek880/edit#gid=236239300"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $json.clean_name }}",
+            "Phone": "={{ $json.clean_phone }}",
+            "Email": "={{ $json.clean_email }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "cellFormat": "RAW"
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        608,
+        -96
+      ],
+      "id": "8f2757b5-a73a-4854-8bf1-16d1229c1521",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "g9gCwsyxBgpio0Ru",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Duplicates": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "32b7bb01-0d92-4bc1-b743-a5eace28f7f7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "85964b30027a28a078a34894c906e720e0d5ee3760c246c4149ea53954f7fd84"
+  },
+  "nodeGroups": [],
+  "id": "fIakhnHhD7ErRl7n",
+  "tags": []
+}

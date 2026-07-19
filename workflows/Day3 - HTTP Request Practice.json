@@ -1,0 +1,125 @@
+{
+  "name": "Day3 - HTTP Request Practice",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        16,
+        0
+      ],
+      "id": "0d9ec815-217e-44a4-afc7-eca216c940e1",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://api.open-meteo.com/v1/forecast?latitude=23.81&longitude=90.41&current_weather=true",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "5fcbeb6f-bae2-4a89-80c4-27a03eb422cf",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1374c282-e954-4971-9704-3b3b580ae95e",
+              "name": "temp_celsius",
+              "value": "={{ $json.current_weather.temperature }}",
+              "type": "string"
+            },
+            {
+              "id": "ccaf880e-5c33-43ce-abd5-35ecfc0fdf5e",
+              "name": "wind_speed",
+              "value": "={{ $json.current_weather.windspeed }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        416,
+        0
+      ],
+      "id": "174962c6-98e3-4f45-b299-a529e521542e",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://webhook.site/46d5d7fa-94ae-4869-8095-a14e68d25e16",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"name\": \"test\", \"phone\": \"0400000000\"}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        640,
+        0
+      ],
+      "id": "6baea9d9-8014-4659-b514-6cf719107cc0",
+      "name": "HTTP Request1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "fd12d658-1568-47f9-a94d-3fec12b01c9f",
+  "meta": {
+    "instanceId": "85964b30027a28a078a34894c906e720e0d5ee3760c246c4149ea53954f7fd84"
+  },
+  "nodeGroups": [],
+  "id": "4CJjyWc6QeRQ9Atg",
+  "tags": []
+}

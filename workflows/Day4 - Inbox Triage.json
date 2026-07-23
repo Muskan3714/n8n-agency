@@ -7,7 +7,7 @@
       "typeVersion": 1,
       "position": [
         -2976,
-        16
+        -208
       ],
       "id": "646d448c-ab84-4bd4-a075-4acefa53036a",
       "name": "When clicking ‘Execute workflow’"
@@ -26,8 +26,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.4,
       "position": [
-        -2688,
-        176
+        -2768,
+        80
       ],
       "id": "2d0463e1-ce2e-46b3-835c-e2329323445a",
       "name": "HTTP Request1",
@@ -54,8 +54,8 @@
       "type": "@n8n/n8n-nodes-langchain.chainLlm",
       "typeVersion": 1.9,
       "position": [
-        -2432,
-        80
+        -2480,
+        96
       ],
       "id": "55ae13b8-3b16-4f72-83cd-385e0999a36c",
       "name": "Basic LLM Chain"
@@ -73,8 +73,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.3,
       "position": [
-        -2256,
-        352
+        -2480,
+        256
       ],
       "id": "7886f638-505a-4440-8495-339ea4d990c6",
       "name": "OpenAI Chat Model",
@@ -94,8 +94,8 @@
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2.1,
       "position": [
-        -2912,
-        -448
+        -2944,
+        -560
       ],
       "id": "61b6b256-f9f7-4e83-a892-587bafe0e04e",
       "name": "Webhook",
@@ -553,6 +553,45 @@
           "name": "Google Sheets account"
         }
       }
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.item.json.choices[0].message.content;\nlet parsed;\n\ntry {\n  parsed = JSON.parse(raw);\n} catch (e) {\n  return [{ json: { valid: false, error: \"not valid JSON\", raw } }];\n}\n\nconst requiredKeys = [\"name\", \"suburb\", \"job_type\", \"urgency\", \"preferred_time\"];\nconst missingKeys = requiredKeys.filter(k => !(k in parsed));\nif (missingKeys.length > 0) {\n  return [{ json: { valid: false, error: `missing keys: ${missingKeys.join(\", \")}`, raw: parsed } }];\n}\n\nconst validUrgency = [\"low\", \"medium\", \"high\"];\nif (!validUrgency.includes(parsed.urgency)) {\n  return [{ json: { valid: false, error: \"invalid urgency value\", raw: parsed } }];\n}\n\nreturn [{ json: { valid: true, ...parsed } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2528,
+        -192
+      ],
+      "id": "129a8896-e524-40ae-aa38-693fec94b0b6",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"model\": \"openai/gpt-oss-120b\",\n  \"messages\": [\n    {\"role\": \"system\", \"content\": \"You are an intake assistant for a Sydney trades business. Extract structured details from incoming customer messages.\"},\n    {\"role\": \"user\", \"content\": \"hi its dave from marrickville, my hot water systems been making this weird banging noise for like 2 days now, kinda worried its gonna blow, could someone maybe come out tmrw arvo if poss? cheers\"}\n  ],\n  \"response_format\": {\n    \"type\": \"json_schema\",\n    \"json_schema\": {\n      \"name\": \"job_extraction\",\n      \"schema\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"name\": {\"type\": [\"string\", \"null\"]},\n          \"suburb\": {\"type\": [\"string\", \"null\"]},\n          \"job_type\": {\"type\": [\"string\", \"null\"]},\n          \"urgency\": {\"type\": \"string\", \"enum\": [\"low\", \"medium\", \"high\"]},\n          \"preferred_time\": {\"type\": [\"string\", \"null\"]}\n        },\n        \"required\": [\"name\", \"suburb\", \"job_type\", \"urgency\", \"preferred_time\"],\n        \"additionalProperties\": false\n      }\n    }\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -2768,
+        -208
+      ],
+      "id": "e4afbc49-8793-4cf9-a2ad-31f44af18564",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "l1msbin29dD6R0cw",
+          "name": "Header Auth account"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -561,12 +600,12 @@
       "main": [
         [
           {
-            "node": "HTTP Request1",
+            "node": "HTTP Request",
             "type": "main",
             "index": 0
           },
           {
-            "node": "Basic LLM Chain",
+            "node": "HTTP Request1",
             "type": "main",
             "index": 0
           }
@@ -575,7 +614,13 @@
     },
     "HTTP Request1": {
       "main": [
-        []
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Basic LLM Chain": {
@@ -658,6 +703,17 @@
           }
         ]
       ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
@@ -666,7 +722,7 @@
     "binaryMode": "separate",
     "availableInMCP": false
   },
-  "versionId": "a2f78e6d-c9ca-4e2e-b1bf-38c4c1fbd5fb",
+  "versionId": "0fcc0517-51da-4a72-bd4c-3d26cc4bdca7",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "85964b30027a28a078a34894c906e720e0d5ee3760c246c4149ea53954f7fd84"

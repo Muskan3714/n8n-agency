@@ -1,0 +1,347 @@
+{
+  "name": "Day5 - Job Extraction",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "day5-extract",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -368,
+        0
+      ],
+      "id": "dc2371e6-6a35-4e00-a9ce-40f074af7576",
+      "name": "Webhook",
+      "webhookId": "7575da09-e575-4cc8-b40f-4182f4a93b1a"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.groq.com/openai/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"llama-3.3-70b-versatile\",\n  \"messages\": [\n    {\"role\": \"system\", \"content\": \"You are Jess, the intake assistant for a Sydney plumbing business. Extract structured job details from incoming customer messages into JSON with keys: name, suburb, job_type, urgency, is_genuine_request.\\n\\nurgency must be exactly one of: low, medium, high.\\nis_genuine_request must be true or false — set it to false if the message is spam, an advertisement, nonsensical, or contains no identifiable plumbing-related request whatsoever (e.g. 'hi', '???', promotional text). Only set it to true if there is an actual plumbing service request, even a vague one.\\n\\nExamples:\\n\\nMessage: \\\"hi its dave from marrickville, hot water systems banging, tmrw arvo if poss\\\"\\nOutput: {\\\"name\\\":\\\"Dave\\\",\\\"suburb\\\":\\\"Marrickville\\\",\\\"job_type\\\":\\\"hot water system repair\\\",\\\"urgency\\\":\\\"high\\\",\\\"is_genuine_request\\\":true}\\n\\nMessage: \\\"CONGRATULATIONS you have won a free prize claim now\\\"\\nOutput: {\\\"name\\\":null,\\\"suburb\\\":null,\\\"job_type\\\":null,\\\"urgency\\\":\\\"low\\\",\\\"is_genuine_request\\\":false}\\n\\nMessage: \\\"hi\\\"\\nOutput: {\\\"name\\\":null,\\\"suburb\\\":null,\\\"job_type\\\":null,\\\"urgency\\\":\\\"low\\\",\\\"is_genuine_request\\\":false}\"},\n    {\"role\": \"user\", \"content\": \"={{ $json.body.message }}\"}\n  ],\n  \"response_format\": {\"type\": \"json_object\"}\n}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -80,
+        0
+      ],
+      "id": "a116b76c-d0d9-4816-bd62-8674f35e794e",
+      "name": "HTTP Request",
+      "retryOnFail": true,
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "l1msbin29dD6R0cw",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $input.item.json.choices[0].message.content;\nlet parsed;\ntry {\n  parsed = JSON.parse(raw);\n} catch (e) {\n  return [{ json: { valid: false, error: \"not valid JSON\", raw } }];\n}\nconst requiredKeys = [\"name\", \"suburb\", \"job_type\", \"urgency\", \"is_genuine_request\"];\nconst missingKeys = requiredKeys.filter(k => !(k in parsed));\nif (missingKeys.length > 0) {\n  return [{ json: { valid: false, error: `missing keys: ${missingKeys.join(\", \")}`, raw: parsed } }];\n}\nconst validUrgency = [\"low\", \"medium\", \"high\"];\nif (!validUrgency.includes(parsed.urgency)) {\n  return [{ json: { valid: false, error: \"invalid urgency value\", raw: parsed } }];\n}\nif (parsed.is_genuine_request !== true) {\n  return [{ json: { valid: false, error: \"not a genuine request\", raw: parsed } }];\n}\nreturn [{ json: { valid: true, ...parsed } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        128,
+        0
+      ],
+      "id": "c5e898f9-554f-4b0a-a24e-8d1ab9a0462d",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "74e98be8-e29f-4e6a-8a2e-715baa4d5234",
+              "leftValue": "={{ $json.valid }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        336,
+        0
+      ],
+      "id": "d85538fc-8ab2-4834-b1c7-55ff10279265",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1tSilbAr4y_NsmtEDYVTGUQE9DBzlxVyf2SK0HvDI4dY",
+          "mode": "list",
+          "cachedResultName": "Day5 Job Extraction",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1tSilbAr4y_NsmtEDYVTGUQE9DBzlxVyf2SK0HvDI4dY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Job Intake",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1tSilbAr4y_NsmtEDYVTGUQE9DBzlxVyf2SK0HvDI4dY/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "name": "={{ $json.name }}",
+            "suburb": "={{ $json.suburb }}",
+            "job_type": "={{ $json.job_type }}",
+            "urgency": "={{ $json.urgency }}",
+            "preferred_time": "={{ $json.preferred_time }}",
+            "timestamp": "={{ $now }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "suburb",
+              "displayName": "suburb",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "job_type",
+              "displayName": "job_type",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "urgency",
+              "displayName": "urgency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "preferred_time",
+              "displayName": "preferred_time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        544,
+        -96
+      ],
+      "id": "b597ea21-1865-456b-ab52-2f4db189551b",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "g9gCwsyxBgpio0Ru",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1tSilbAr4y_NsmtEDYVTGUQE9DBzlxVyf2SK0HvDI4dY",
+          "mode": "list",
+          "cachedResultName": "Day5 Job Extraction",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1tSilbAr4y_NsmtEDYVTGUQE9DBzlxVyf2SK0HvDI4dY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 2139786270,
+          "mode": "list",
+          "cachedResultName": "Needs Review",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1tSilbAr4y_NsmtEDYVTGUQE9DBzlxVyf2SK0HvDI4dY/edit#gid=2139786270"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "raw_message": "={{ $('Webhook').item.json.body.message }}",
+            "error": "={{ $json.error }}",
+            "timestamp": "={{ $now }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "raw_message",
+              "displayName": "raw_message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "error",
+              "displayName": "error",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        560,
+        112
+      ],
+      "id": "7779c7cc-0d2f-4757-a4b7-dc8017a72316",
+      "name": "Append row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "g9gCwsyxBgpio0Ru",
+          "name": "Google Sheets account"
+        }
+      },
+      "disabled": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false,
+    "timeSavedMode": "fixed",
+    "errorWorkflow": "zXm0zXwxGBlwg2eS",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "versionId": "5f5df403-4398-48ca-b52d-485763c4e548",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "85964b30027a28a078a34894c906e720e0d5ee3760c246c4149ea53954f7fd84"
+  },
+  "nodeGroups": [],
+  "id": "CVkwVqvoU4Z2fpiV",
+  "tags": []
+}

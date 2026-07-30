@@ -1,0 +1,88 @@
+{
+  "name": "Day7 - Error Handler - Global",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        0
+      ],
+      "id": "821489fd-d3d8-4122-8d29-fa5b9799cb7d",
+      "name": "Error Trigger"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        0
+      ],
+      "id": "d0848471-520b-4b0a-96f9-7f92650b14f4",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "chatId": "6402967624",
+        "text": "=🚨 Workflow failed: {{ $json.workflow.name }}\nNode: {{ $json.execution.lastNodeExecuted }}\nError: {{ $json.execution.error.message }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -176,
+        0
+      ],
+      "id": "bb0ee00c-de70-4b20-84a9-bb763c911a58",
+      "name": "Send a text message",
+      "webhookId": "4ea42b73-00f1-4934-bf0d-c63813279cd4",
+      "credentials": {
+        "telegramApi": {
+          "id": "au7Juwc3whM1dlyi",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "2f4c0ca7-e13f-4a30-9be9-3341cec52c94",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "85964b30027a28a078a34894c906e720e0d5ee3760c246c4149ea53954f7fd84"
+  },
+  "nodeGroups": [],
+  "id": "zXm0zXwxGBlwg2eS",
+  "tags": []
+}
